@@ -72,7 +72,7 @@ set (array_src
      Tile.cpp
      TransientCache.cpp
      TupleArray.cpp
-)
+        ../../kdTree/kdTree.h ../../kdTree/kdTree.cpp)
 
 add_library(array_lib OBJECT ${array_src})
 target_include_directories(array_lib PRIVATE ${CityHash_INCLUDE_DIR})

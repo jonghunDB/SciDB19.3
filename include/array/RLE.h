@@ -140,7 +140,7 @@ public:
         return sg._lPosition + sg._length - 1;
     }
 
-    /**
+    /*
      * Find segment of non-empty elements with position greater or equal than specified.
      */
     size_t findSegment(position_t pos) const {

@@ -274,7 +274,7 @@ DataStore::readData(off_t off, void* buffer, size_t len)
     iovs[0].iov_len = sizeof(DiskChunkHeader);
     iovs[1].iov_base = (char*) buffer;
     iovs[1].iov_len = len;
-
+q
     /* Issue the read
      */
     _file->readAllv(iovs, 2, off);

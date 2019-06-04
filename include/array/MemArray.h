@@ -76,7 +76,9 @@ namespace scidb
 
         virtual ArrayDesc const& getArrayDesc() const;
 
+        //MemArrayIterator을 생성
         virtual std::shared_ptr<ArrayIterator> getIteratorImpl(const AttributeDesc& attId) override;
+        //read only MemArrayIterator을 생성
         virtual std::shared_ptr<ConstArrayIterator> getConstIteratorImpl(const AttributeDesc& attId) const override;
 
         MemArray(ArrayDesc const& arrayDesc, std::shared_ptr<Query> const& query);
@@ -101,6 +103,7 @@ namespace scidb
       protected:
         ArrayDesc desc;
       private:
+        //
         void makeChunk(Address const& addr,
                        CachedTmpChunk*& chunk,
                        CachedTmpChunk*& bitmapchunk,

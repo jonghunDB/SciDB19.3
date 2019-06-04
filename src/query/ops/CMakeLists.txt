@@ -43,7 +43,7 @@ set(ops_lib_src
     between/PhysicalBetween.cpp
     between/LogicalCrossBetween.cpp
     between/PhysicalCrossBetween.cpp
-    filter/FilterArray.cpp
+        filter/DAFilterArray.cpp
     filter/LogicalFilter.cpp
     filter/PhysicalFilter.cpp
     flatten/CellProvider.cpp

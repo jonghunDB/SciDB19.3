@@ -202,6 +202,7 @@ public:
         {
             char* buf = new char[it->first];
 
+            //offset, buffer, length
             ds->readData(it->second, buf, it->first);
             for (uint32_t* p = reinterpret_cast<uint32_t*>(buf);
                  p < reinterpret_cast<uint32_t*>(buf + it->first);

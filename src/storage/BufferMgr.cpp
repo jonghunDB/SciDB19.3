@@ -617,6 +617,7 @@ BufferMgr::BufferHandle BufferMgr::_pinBufferLocked(BufferKey& bk, CompressorTyp
             throw SYSTEM_EXCEPTION_SUBCLASS(RetryPinException);
         }
 
+        //least recently used
         _updateLru(slot);
         bhead.pinCount++;
         if (bhead.pinCount == 1) {
@@ -677,9 +678,11 @@ BufferMgr::BufferHandle BufferMgr::_pinBufferLocked(BufferKey& bk, CompressorTyp
         // Update the slot values
         bhead.offset = bk.getOffset();
 
+        // 이부분에서 데이터를 읽는다.
         // Read the data from the disk
         std::shared_ptr<DataStore> ds;
 
+        // non compressed
         if (cType == CompressorType::NONE) {
             // clang-format off
             LOG4CXX_TRACE(logger, "bufferMgr swap in buffer.  "
@@ -692,6 +695,7 @@ BufferMgr::BufferHandle BufferMgr::_pinBufferLocked(BufferKey& bk, CompressorTyp
             ds = DataStores::getInstance()->getDataStore(bhead.dsk);
             bhead.allocSize = ds->readData(bhead.offset, bhead.blockBase, bhead.size);
         } else {
+            // compressed data
             SCIDB_ASSERT(bhead.compressedSize < bhead.size);
             // clang-format off
             LOG4CXX_TRACE(logger, "bufferMgr swap in compressed buffer.  "
@@ -740,6 +744,7 @@ BufferMgr::BufferHandle BufferMgr::_pinBufferLocked(BufferKey& bk, CompressorTyp
             ds = DataStores::getInstance()->getDataStore(bhead.dsk);
             bhead.allocSize =
                 ds->readData(bhead.offset, bhead.compressedBlockBase, bhead.compressedSize);
+            //decompress한 데이터를 bhead에 저장을 한다.
             size_t len = CompressorFactory::getInstance()
                              .getCompressor(bhead.compressorType)
                              ->decompress(reinterpret_cast<void*>(bhead.blockBase),

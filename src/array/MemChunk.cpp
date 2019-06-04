@@ -147,6 +147,7 @@ namespace scidb
         }
     }
 
+
     void MemChunk::setBitmapChunk(Chunk* newBitmapChunk)
     {
         // IF...
@@ -226,7 +227,7 @@ namespace scidb
     {
         assert(newSize>0);
 #ifndef SCIDB_CLIENT
-        arena::ArenaPtr arenaFromBufferMgr = BufferMgr::getInstance()->getArena();
+        arena::ArenaPtr arenaFromBufferMgr = BufferMgr::getInstance()->get Arena();
         if (data) {
             arena::destroy(*arenaFromBufferMgr, (char*)data);
         }
@@ -1020,7 +1021,7 @@ void addToPayload(const position_t curPos,
             << newSize << _sizeLimit;
         }
     }
-
+    //  여기를 잘 살펴보자..
     void RLEChunkIterator::flush()
     {
         if (!_needsFlush) {
@@ -1033,7 +1034,7 @@ void addToPayload(const position_t curPos,
                 dataChunk->allocate(bitmap.packedSize());
                 bitmap.pack(reinterpret_cast<char*>(dataChunk->getWriteData()));
             } else {
-                RLEPayload payload(_values, emptyBitmap->count(), type.byteSize(), attr.getDefaultValue(), type.bitSize()==1, isEmptyable);
+                RLEPayload  (_values, emptyBitmap->count(), type.byteSize(), attr.getDefaultValue(), type.bitSize()==1, isEmptyable);
                 if (isEmptyable && (mode & APPEND_EMPTY_BITMAP)) {
                     RLEEmptyBitmap bitmap(_values, true);
                     dataChunk->allocate(payload.packedSize() + bitmap.packedSize());

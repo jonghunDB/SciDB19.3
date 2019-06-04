@@ -50,6 +50,7 @@ namespace scidb
     /**
      * Chunk of temporary (in-memory) array
      */
+     // compress를 사용할때 이 MemChunk를 만듦.
     class MemChunk : public Chunk
     {
 #ifndef SCIDB_CLIENT
@@ -72,6 +73,7 @@ namespace scidb
         ArrayDesc const* arrayDesc;
         Chunk* bitmapChunk;
         Array const* array;
+
         std::shared_ptr<ConstRLEEmptyBitmap> emptyBitmap;
         std::shared_ptr<ConstChunkIterator>
             getConstIterator(std::shared_ptr<Query> const& query, int iterationMode) const;

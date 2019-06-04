@@ -424,6 +424,7 @@ check_function_exists(malloc_stats HAVE_MALLOC_STATS)
 #
 # INCLUDE DIRECTORIES
 #
+include_directories("${CMAKE_SOURCE_DIR}/udos")
 include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/utils")
@@ -433,6 +434,8 @@ include_directories(${LOG4CXX_INCLUDE_DIRS})
 include_directories(${LIBPQXX_INCLUDE_DIRS})
 include_directories(${LIBPQ_INCLUDE_DIRS})
 include_directories("${CMAKE_SOURCE_DIR}/extern")
+
+include_directories("${CMAKE_SOURCE_DIR}/include/kdTree")
 
 link_directories(${LIBPQXX_LIBRARY_DIRS})
 link_directories(${LIBPQ_LIBRARY_DIRS})
@@ -478,6 +481,7 @@ endfunction()
 #
 # SUBDIRECTORIES
 #
+add_subdirectory("udos")
 add_subdirectory("extern")
 add_subdirectory("src")
 add_subdirectory("utils")

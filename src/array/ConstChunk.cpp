@@ -96,6 +96,7 @@ namespace scidb
         ASSERT_EXCEPTION_FALSE("getWriteData() on ConstChunk not permitted");
     }
 
+    // Impl?  implement인가.
     const void* ConstChunk::getConstDataImpl() const
     {
         // inside trust boundary

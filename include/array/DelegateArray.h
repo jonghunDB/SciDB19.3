@@ -44,7 +44,7 @@ class DelegateChunk : public ConstChunk
 {
     friend class DelegateChunkIterator;
 public:
-    const ArrayDesc& getArrayDesc() const;
+    const ArrayDesc& getArrayDesc() const ;
     const AttributeDesc& getAttributeDesc() const;
     CompressorType getCompressionMethod() const override;
     Coordinates const& getFirstPosition(bool withOverlap) const override;

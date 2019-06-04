@@ -170,11 +170,15 @@ class PhysicalScan: public  PhysicalOperator
             }
         }
 
+
+        // Autochunk, 즉 Dimension의 chunk interval이 정해지지 않으면 Defalut interval을 사용함
+        // 이 경우에는 MemArray를 생성
         if (_schema.isAutochunked())
         {
             // Whether transient or not, scanning an array that is autochunked
             // in the system catalog gets you a non-autochunked empty MemArray.
 
+            //대략 dense one million cell을 계산해서 interval을 설정함.
             Dense1MChunkEstimator::estimate(_schema.getDimensions());
             return make_shared<MemArray>(_schema, query);
         }
@@ -184,6 +188,7 @@ class PhysicalScan: public  PhysicalOperator
             ASSERT_EXCEPTION(a.get()!=nullptr, string("Temp array ")+_schema.toString()+string(" not found"));
             return a;                                   // ...temp array
         }
+        // if not autochunk and transient, DBArray를 생성
         else
         {
             assert(_schema.getId() != 0);

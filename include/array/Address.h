@@ -77,7 +77,7 @@ struct Address
         this->coords = addr.coords;
     }
 
-    /**
+    /*
      * Partial comparison function, used to implement std::map
      * @param other another aorgument of comparison
      * @return true if "this" preceeds "other" in partial order

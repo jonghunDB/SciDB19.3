@@ -21,7 +21,7 @@
 */
 
 /*
- * LogicalFilter.cpp
+ * LogicalDAFilter.cpp
  *
  *  Created on: Apr 11, 2010
  *      Author: Knizhnik
@@ -67,10 +67,10 @@ using namespace std;
  *   n/a
  *
  */
-class LogicalFilter : public LogicalOperator
+class LogicalDAFilter : public LogicalOperator
 {
 public:
-    LogicalFilter(const std::string& logicalName,
+    LogicalDAFilter(const std::string& logicalName,
                   const std::string& alias)
             : LogicalOperator(logicalName, alias)
     {
@@ -108,6 +108,6 @@ public:
     }
 };
 
-DECLARE_LOGICAL_OPERATOR_FACTORY(LogicalFilter, "filter")
+DECLARE_LOGICAL_OPERATOR_FACTORY(LogicalDAFilter, "DAfilter")
 
 }  // namespace scidb

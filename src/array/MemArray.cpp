@@ -228,6 +228,12 @@ namespace scidb
         return desc;
     }
 
+    // An Address is used to specify the location of a chunk inside an array
+    // makechunk를 할때 현재 array에 대해 cachedchunk로 data chunk와 bitmap chunk를 만든다
+    /**
+     * CachedTmpChunk : Chunk of MemArray managed by buffer cache
+     */
+     // Linux의 buffer cache를 이용한다. block device가 가지고있는 블록에 대한 캐쉬. 메모리에 블록 단위로 캐슁함..
     void MemArray::makeChunk(Address const& addr,
                              CachedTmpChunk*& chunk,
                              CachedTmpChunk*& bitmapchunk,
@@ -250,7 +256,7 @@ namespace scidb
         if (bitmapAttr != NULL && bitmapAttr->getId() != addr.attId) {
 
             Address bitmapAddr(bitmapAttr->getId(), addr.coords);
-
+            // buffer cache
             bitmapchunk = createCachedChunk<CachedTmpChunk>(*arena);
             bitmapchunk->initialize(this,
                                     &desc,
@@ -263,10 +269,12 @@ namespace scidb
          */
         SCIDB_ASSERT(desc.getAttributes().hasAttribute(addr.attId));
         auto targetAttr = desc.getAttributes().find(addr.attId);
+        //data chunk를 만듦
         chunk->initialize(this,
                           &desc,
                           addr,
                           targetAttr->getDefaultCompressionMethod());
+        //만든 data chunk에 대해 bitmap chunk를 설정
         chunk->setBitmapChunk(bitmapchunk);
 
         /* If this is a new chunk, we will return it pinned
@@ -629,10 +637,12 @@ namespace scidb
         /* TODO: previously we checked for existence of chunk at this point.
            Is this necessary?  Can we check when chunk is written (unpin)?
          */
+        // non compressed이면 makechunk
         _array->makeChunk(_addr, _currChunk, _currBitmapChunk, true /* chunk pinned */);
         return *(_currChunk);
     }
 
+    //compress하면 Memchunk 생성
     Chunk& MemArrayIterator::newChunk(Coordinates const& pos, CompressorType compressionMethod)
     {
         SCIDB_ASSERT(compressionMethod != CompressorType::UNKNOWN);
