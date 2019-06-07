@@ -144,6 +144,7 @@ AttributeDesc const* Attributes::getEmptyBitmapAttribute() const
             &_attributes[_emptyIndicatorPosition()] : nullptr);
 }
 
+// EmptyTagAttribute
 Attributes& Attributes::addEmptyTagAttribute()
 {
     if (!hasEmptyIndicator()) {

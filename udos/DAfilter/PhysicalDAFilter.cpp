@@ -40,6 +40,8 @@ namespace scidb {
 using namespace std;
 
 
+static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("scidb.toy_operators.instance_stats"));
+
 class PhysicalDAFilter : public PhysicalOperator
 {
 public:

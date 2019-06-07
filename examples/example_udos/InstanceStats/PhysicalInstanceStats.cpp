@@ -47,6 +47,7 @@ class PhysicalInstanceStats : public PhysicalOperator
 {
 public:
     /**
+     * marshalling 마셜링이란 한 객체의 메모리에서 표현방식을 저장 또는 전송에 적합한 다른 데이터 형식으로 변환하는 과정
      * An inner struct used to gather the information we need to output. To facilitate the "global" option, this struct
      * may be marshalled and un-marshalled into a memory buffer.
      */

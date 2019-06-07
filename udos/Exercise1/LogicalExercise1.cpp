@@ -21,11 +21,16 @@
 */
 
 
+
+
 #include <memory>
 #include <log4cxx/logger.h>
-#include "query/LogicalOperator.h"
+
+#include <query/Expression.h>
+#include <query/Query.h>
+#include <query/LogicalOperator.h>
+
 #include "system/Exceptions.h"
-#include "query/LogicalExpression.h"
 #include "Exercise1.h"
 
 static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("scidb.query.ops.Exercise1.LogicalExercise1"));
@@ -58,37 +63,27 @@ namespace scidb {
  *
  */
     class LogicalExercise1 : public LogicalOperator {
+
     public:
 
-        LogicalExercise1(const std::string &logicalName, const std::string &alias) :
-                LogicalOperator(logicalName, alias) {
-            ADD_PARAM_INPUT(); /// input array
-            ADD_PARAM_VARIES(); /// additional inputs
+
+        LogicalExercise1(const string& logicalName, const string& alias):
+                LogicalOperator(logicalName, alias)
+        {
         }
-
-        /**
-         * @see LogicalOperator::nextVaryParamPlaceholder()
-         */
-        std::vector<std::shared_ptr<OperatorParamPlaceholder> >
-        nextVaryParamPlaceholder(const std::vector<ArrayDesc> &schemas) {
-            LOG4CXX_DEBUG(logger,"nexVaryParamPlaceholder, _parameters.size() : "<<_parameters.size());
-            //
-            //  The arguments to the Exercise1(...) operator are:
-            //     Exercise1( srcArray, startingCell, endingCell, attributeID )
-            //
-            std::vector<std::shared_ptr<OperatorParamPlaceholder> > res;
-
-            if (_parameters.size() < schemas[0].getDimensions().size() * 2) { /// Starting cell, Ending cell
-                res.push_back(PARAM_CONSTANT("int64"));
-            } else if (_parameters.size() == schemas[0].getDimensions().size() * 2) { /// attribute ID
-                res.push_back(PARAM_CONSTANT("int32"));
-            } else{
-                res.push_back(END_OF_VARIES_PARAMS());
-            }
-
-            return res;
+        //OperatorParamPlaceholder PP
+        //PlistRegex RE
+        static PlistSpec const* makePlistSpec()
+        {
+            static PlistSpec argSpec {
+                    { "", // positionals
+                               RE(PP(PLACEHOLDER_INPUT)),
+                    },
+                    {"log", RE(PP(PLACEHOLDER_CONSTANT, TID_BOOL))},
+                    {"global", RE(PP(PLACEHOLDER_CONSTANT, TID_BOOL))},
+            };
+            return &argSpec;
         }
-
 
         /**
          *  @see LogicalOperator::inferSchema()
@@ -116,17 +111,18 @@ namespace scidb {
                 LOG4CXX_DEBUG(logger,"ending cell : "<<dimension);
             }
 
-
             // output array schema 정의-----------------------------------------------------------
             Attributes outputAttributes;
-            outputAttributes.push_back(AttributeDesc(0, "attributeName", TID_DOUBLE, 0, CompressorType::NONE));
-            outputAttributes = addEmptyTagAttribute(outputAttributes);
+            outputAttributes.push_back(
+                    AttributeDesc("attribute_name",TID_DOUBLE,0,CompressorType::NONE));
+
+            outputAttributes.addEmptyTagAttribute();
 
             Dimensions outputDimensions;
             for(size_t i = nDims; i < nDims; i++){
-                outputDimensions.push_back(DimensionDesc(""+i, startingCell[i], endingCell[i], endingCell[i]-startingCell[i]+1, 0));
+                outputDimensions.push_back(DimensionDesc("i", startingCell[i], endingCell[i], endingCell[i]-startingCell[i]+1, 0));
             }
-            return ArrayDesc("outputArray", outputAttributes, outputDimensions, defaultPartitioning(), query->getDefaultArrayResidency());
+            return ArrayDesc("outputArray", outputAttributes, outputDimensions,createDistribution(getSynthesizedDistType()) , query->getDefaultArrayResidency());
             //-----------------------------------------------------------------------------
         }
 

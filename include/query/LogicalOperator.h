@@ -40,6 +40,7 @@ class Aggregate;
 class ArrayDesc;
 
 // Convenience type aliases for operators that implement makePlistSpec().
+//정규표현식?
 using PlistRegex = dfa::RE<OperatorParamPlaceholder>;
 using PlistSpec = std::map<std::string, PlistRegex>;
 using PP = OperatorParamPlaceholder; // Shorthand to make writing these specs

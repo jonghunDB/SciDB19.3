@@ -20,8 +20,10 @@
 * END_COPYRIGHT
 */
 
-#include <util/Network.h>
-#include "query/Operator.h"
+#include <query/Expression.h>
+#include <query/PhysicalOperator.h>
+
+#include <network/Network.h>
 #include "array/Metadata.h"
 #include "array/Array.h"
 #include "Exercise1.h"
@@ -127,7 +129,7 @@ namespace scidb {
 
             //output attribute
             std::shared_ptr<ArrayIterator> outputArrayIter = outputArray->getIterator(0);
-            std::shared_ptr<ChunkIterator> outputChunkIter = outputArrayIter->newChunk(startingCell).getIterator(query,ChunkIterator::SEQUENTIAL_WRITE);
+            std::shared_ptr<ConstChunkIterator> outputChunkIter = outputArrayIter->newChunk(startingCell).getIterator(query,ChunkIterator::SEQUENTIAL_WRITE);
             outputChunkIter->setPosition(startingCell);
 
             //"Example" of writing cells

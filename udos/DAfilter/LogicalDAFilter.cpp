@@ -28,6 +28,7 @@
  */
 
 #include <query/LogicalOperator.h>
+#include <query/Expression.h>
 
 namespace scidb {
 
@@ -96,13 +97,32 @@ public:
         return where[0] == 0;
     }
 
-    ArrayDesc inferSchema(std::vector<ArrayDesc> schemas,
-                          std::shared_ptr<Query> query)
+    /**
+     * @note all the parameters are assembled in the _parameters member variable
+     */
+
+    ArrayDesc inferSchema(std::vector<ArrayDesc> schemas, std::shared_ptr<Query> query)
     {
+        /* Check for a "global: true" parameter. */
+        bool global = false;
+
+        Parameter globalParam = findKeyword("global");
+        if(globalParam)
+        {
+            global = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&)globalParam)->getExpression(),TID_BOOL).getBool();
+        }
+
+        /* Make the output schema.*/
+        //schemas vector를 불러와서 하나의 array인지 확인
         assert(schemas.size() == 1);
+        //example) filter(array ,attribute1 < 100 ) 하나의 attribute이나 dimension을 parameter로 씀
         assert(_parameters.size() == 1);
         assert(_parameters[0]->getParamType() == PARAM_LOGICAL_EXPRESSION);
 
+        if(global)
+        {
+
+        }
         // ArrayDesc consumes the new copy, source is discarded.
         return schemas[0].addEmptyTagAttribute();
     }
