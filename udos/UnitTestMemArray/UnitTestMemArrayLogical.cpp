@@ -21,41 +21,39 @@
 */
 
 /*
- * LogicalFilter.cpp
+ * @file UnitTestMemArrayLogical.cpp
  *
- *  Created on: Apr 11, 2010
- *      Author: Knizhnik
+ * @brief The logical operator interface for testing deep-chunk merge.
  */
 
+#include <query/Query.h>
+#include <array/Array.h>
 #include <query/LogicalOperator.h>
 #include <query/Expression.h>
 
-namespace scidb {
 
+namespace scidb
+{
 using namespace std;
 
 /**
- * @brief The operator: filter().
+ * @brief The operator: test_memarray().
  *
  * @par Synopsis:
- *   DAfilter( srcArray, expression )
+ *   test_memarray()
  *
  * @par Summary:
- *   The filter operator returns an array the with the same schema as the input
- *   array. The result is identical to the input except that those cells for
- *   which the expression evaluates either false or null are marked as being
- *   empty.
+ *   This operator performs unit tests for memarray. It returns an empty string. Upon failures exceptions are thrown.
  *
  * @par Input:
- *   - srcArray: a source array with srcAttrs and srcDims.
- *   - expression: an expression which takes a cell in the source array as input and evaluates to either True or False.
+ *   n/a
  *
  * @par Output array:
  *        <
- *   <br>   srcAttrs
+ *   <br>   dummy_attribute: string
  *   <br> >
  *   <br> [
- *   <br>   srcDims
+ *   <br>   dummy_dimension: start=end=chunk_interval=0.
  *   <br> ]
  *
  * @par Examples:
@@ -65,45 +63,19 @@ using namespace std;
  *   n/a
  *
  * @par Notes:
- *   n/a
  *
  */
-class LogicalDAFilter : public LogicalOperator
+class UnitTestMemArrayLogical: public LogicalOperator
 {
 public:
-    LogicalDAFilter(const std::string& logicalName,
-                  const std::string& alias)
-            : LogicalOperator(logicalName, alias)
+    UnitTestMemArrayLogical(const string& logicalName, const std::string& alias):
+    LogicalOperator(logicalName, alias)
     {
-        _properties.tile = true;
     }
 
-    static PlistSpec const* makePlistSpec()
+    ArrayDesc inferSchema(std::vector<ArrayDesc> schemas, std::shared_ptr< Query> query)
     {
-        static PlistSpec argSpec {
-            { "", // positionals
-              RE(RE::LIST, {
-                 RE(PP(PLACEHOLDER_INPUT)),
-                 RE(PP(PLACEHOLDER_EXPRESSION, TID_BOOL))
-              })
-            }
-        };
-        return &argSpec;
-    }
 
-    bool compileParamInTileMode(PlistWhere const& where,
-                                string const&) override
-    {
-        return where[0] == 0;
-    }
-
-    /**
-     * @note all the parameters are assembled in the _parameters member variable
-     */
-
-    ArrayDesc inferSchema(std::vector<ArrayDesc> schemas, std::shared_ptr<Query> query)
-    {
-        /* Check for a "global: true" parameter. */
         bool global = false;
 
         Parameter globalParam = findKeyword("global");
@@ -111,6 +83,28 @@ public:
         {
             global = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&)globalParam)->getExpression(),TID_BOOL).getBool();
         }
+
+        /* Make the output schema.*/
+        Attributes attributes;
+        attributes.push_back(AttributeDesc(
+                string("firstAttribute"), TID_INT64, 0, CompressorType::NONE));
+
+
+
+        Dimensions dimensions;
+        Coordinates coordinates;
+        coordinates.
+        dimensions.push_back(DimensionDesc(
+                string("firstDimension"), Coordinate(0), Coordinate(0), uint32_t(0), uint32_t(0)));
+        //vector<DimensionDesc> dimensions(1);
+        //dimensions[0] = DimensionDesc(string("dummy_dimension"), Coordinate(0), Coordinate(0), uint32_t(0), uint32_t(0));
+
+
+        return ArrayDesc("test_memarray", attributes, dimensions,
+                         createDistribution(getSynthesizedDistType()),
+                         query->getDefaultArrayResidency());
+
+
 
         /* Make the output schema.*/
         //여기서는 입력받은 schema를 그대로 사용하기 때문에 따로 변경할 필요가 없음. 하지만 일반적으로 udo를 만들때 schema를 설정해야 함
@@ -128,8 +122,8 @@ public:
 
         return schemas[0].addEmptyTagAttribute();
     }
-};
-REGISTER_LOGICAL_OPERATOR_FACTORY(LogicalDAFilter,"DAFilter");
-//DECLARE_LOGICAL_OPERATOR_FACTORY(LogicalDAFilter, "DAFilter" , "logicalDAFilter" )
 
+};
+
+REGISTER_LOGICAL_OPERATOR_FACTORY(UnitTestMemArrayLogical, "test_memarray");
 }  // namespace scidb

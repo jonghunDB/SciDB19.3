@@ -29,6 +29,7 @@
 #ifndef BITMASKUNITTESTS_H_
 #define BITMASKUNITTESTS_H_
 
+//Unit test 예제 Bitmap unit test임.
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <iostream>
@@ -419,6 +420,7 @@ public:
    }
 };
 
+//마지막에 이 매크로를 통해서 test suite에 등록. ASSERT가 성공하면 ture
 CPPUNIT_TEST_SUITE_REGISTRATION(BitmaskTests);
 
 #endif /* BITMASKUNITTESTS_H_ */

@@ -135,6 +135,7 @@ bool Attributes::hasEmptyIndicator() const
     return !_attributes.empty() && _attributes[_emptyIndicatorPosition()].isEmptyIndicator();
 }
 
+//
 AttributeDesc const* Attributes::getEmptyBitmapAttribute() const
 {
     // DJG TODO assert that the empty bitmap attribute exists.  Force callers to check

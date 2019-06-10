@@ -106,11 +106,9 @@ public:
 
         auto ret = inputArrays[0];
         if (hasOtherClauses || spatialRangesPtr->ranges().empty()) {
-            ret = std::make_shared<DAFilterArray>(
-                _schema, ret,
-                dynamic_pointer_cast<OperatorParamPhysicalExpression>(_parameters[0])->getExpression(),
-                query, _tileMode);
+            ret = std::make_shared<DAFilterArray>(_schema, ret, dynamic_pointer_cast<OperatorParamPhysicalExpression>(_parameters[0])->getExpression(), query, _tileMode);
         }
+        //Dimension에 대한 filter이면
         if (!spatialRangesPtr->ranges().empty()) {
             if (_tileMode) {
                 // MaterializedArray(BetweenArray(MaterializedArray()))
@@ -120,7 +118,18 @@ public:
             } else {
                 ret = std::make_shared<BetweenArray>(_schema, spatialRangesPtr, ret);
             }
-        }
+        }//attribute에 대 filtert이면 그냥 DAFilterArray를 return.
+        //DAFilter을 생성한 다음에 이를 토대로 value-map array를 생성하는 코드를 짜보자.
+
+
+        //array iterator, chunk iterator으로 데이터를 value map을 구성. key-value로 구성하게 되는데 key값은 coordinate를 Dimension을 vector로 변형시켜서 이어 붙인 경우
+
+
+
+        //
+
+
+
         return ret;
     }
 

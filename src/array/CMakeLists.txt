@@ -18,7 +18,6 @@
 #
 # END_COPYRIGHT
 ########################################
-
 set (array_src
      AccumulatorArray.cpp
      AllocationBuffer.cpp
@@ -74,6 +73,11 @@ set (array_src
      TupleArray.cpp
         ../../kdTree/kdTree.h ../../kdTree/kdTree.cpp)
 
+
+#[[set (array_src
+        UnitTestMemArrayPhysical.cpp
+        UnitTestMemArrayLogical.cpp
+        )]]
 add_library(array_lib OBJECT ${array_src})
 target_include_directories(array_lib PRIVATE ${CityHash_INCLUDE_DIR})
 target_link_libraries(array_lib PUBLIC Boost::boost)

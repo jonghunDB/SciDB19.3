@@ -75,8 +75,9 @@ using namespace std;
 class DAFilterArray;
 class DAFilterArrayIterator;
 class DAFilterChunkIterator;
+class DAFilterValueMap;
 
-class DAFilterChunkMap
+class DAFilterValueMap
 {
 public:
     CoordinatesMapper _coordinateMapper();
@@ -165,7 +166,8 @@ class DAFilterArray : public DelegateArray
     friend class DAFilterArrayIterator;
     friend class DAFilterChunkIterator;
     friend class NewBitmapChunkIterator;
-    friend class DAFilterChunkMap;
+    friend class DAFilterValueMap;
+
   public:
     virtual DelegateChunk* createChunk(DelegateArrayIterator const* iterator, AttributeID id) const;
     virtual DelegateChunkIterator* createChunkIterator(DelegateChunk const* chunk, int iterationMode) const;

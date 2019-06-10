@@ -53,7 +53,6 @@ namespace scidb {
                     assert((_iterators[i]->getMode() & IGNORE_OVERLAPS)  ==
                            (inputIterator->getMode() & IGNORE_OVERLAPS));
                     break;
-
                 case BindInfo::BI_COORDINATE:
                     if (_mode & TILE_MODE) {
                         _iterators[i]->getItem().getTile()->getCoordinates(
@@ -128,9 +127,9 @@ namespace scidb {
     Value const& DAFilterChunkIterator::getItem()
     {
         LOG4CXX_TRACE(logger, "FCI::getItem");
-        //Tilemode
+        //Tilemode 일경우 복잡.
         if (_mode & TILE_MODE) {
-            //EBM Payload
+            //EBM Payload 새로운 bitmap을 만들때 RLEpayLoad로 만든다!
             RLEPayload* newEmptyBitmap = evaluate().getTile();
             RLEPayload::iterator ei(newEmptyBitmap);
             //delegatearray의  ConstChunkIterator
@@ -141,7 +140,7 @@ namespace scidb {
 
 			// This needs to compare against getMaxLength() or multiple tests
 			// will fail with scidb::SCIDB_SE_NETWORK::SCIDB_LE_CANT_SEND_RECEIVE.
-			//
+			// segment의 수
             if (newEmptyBitmap->count() == CoordinateBounds::getMaxLength()) {
                 //왜 segment가 하나여야하지?
                 assert(newEmptyBitmap->nSegments() == 1);
@@ -173,6 +172,7 @@ namespace scidb {
             LOG4CXX_TRACE(logger, "FCI::getItem returning tile value");
             return _tileValue;
         }
+        //Tile모드 아닐경우 그냥 getItem()
         LOG4CXX_TRACE(logger, "FCI::getItem returning inputIterator getItem");
         return inputIterator->getItem();
     }
@@ -250,11 +250,6 @@ namespace scidb {
             }
         }
         nextVisible();
-    }
-
-    inline Value& DAFilterChunkIterator::buildDenseBitmap()
-    {
-
     }
 
     inline Value& DAFilterChunkIterator::buildBitmap()

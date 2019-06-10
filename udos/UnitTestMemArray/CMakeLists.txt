@@ -19,15 +19,27 @@
 # END_COPYRIGHT
 ########################################
 
-message(STATUS "****************** BEGIN /udos/CMakeLists.txt ******************")
+set (   UnitTestMemArray_src
+        UnitTestMemArrayLogical.cpp
+        UnitTestMemArrayPhysical.cpp
+        )
+include_directories("${CMAKE_SOURCE_DIR}/include")
+
+file(GLOB UnitTestMemArray_include "*.h")
+
+add_library(UnitTestMemArray_lib STATIC ${UnitTestMemArray_src} ${UnitTestMemArray_include})
+#target_link_libraries(ops_lib compression_lib network_lib MurmurHash_lib ${libcsv_LIBRARY})
 
 
-add_subdirectory("Exercise1")
-add_subdirectory("DAfilter")
-add_subdirectory("hdf5")
-add_subdirectory("UnitTestMemArray")
+#set(ops_lib_src
+#        BuildInOps.inc
+#        create_array/LogicalCreateArray.cpp
+#        create_array/PhysicalCreateArray.cpp
 #
-#  PGB: Adding this to help me to build a couple of fast and dirty examples
-#       of how things like the UDF SDK would work.
-#
-# add_subdirectory("Sketches")
+#        )
+
+find_package(Libcsv REQUIRED)
+include_directories(${libcsv_INCLUDE_DIR})
+
+
+
