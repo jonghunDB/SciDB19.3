@@ -32,7 +32,7 @@ CCFLAGS = -pedantic -W -Wextra -Wall -Wno-variadic-macros -Wno-strict-aliasing \
 
 
 INC = -I. -DPROJECT_ROOT="\"$(SCIDB)\"" -I"$(SCIDB_THIRDPARTY_PREFIX)/3rdparty/boost/include/" \
-      -I"$(SCIDB)/include" -I"/home/jh/scidbsource19.3/include" -I./extern
+      -I"$(SCIDB)/include" -I"/home/jh/scidbsource19.3/include" -I"/home/jh/scidbsource19.3/src" -I./extern
 
 LIBS = -shared -Wl,-soname,libExercise1.so -ldl -L. \
        -L"$(SCIDB_THIRDPARTY_PREFIX)/3rdparty/boost/lib" -L"$(SCIDB)/lib" \

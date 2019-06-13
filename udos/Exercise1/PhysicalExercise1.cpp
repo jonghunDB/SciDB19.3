@@ -22,7 +22,7 @@
 
 #include <query/Expression.h>
 #include <query/PhysicalOperator.h>
-
+#include <array/MemArray.h>
 #include <network/Network.h>
 #include "array/Metadata.h"
 #include "array/Array.h"
@@ -52,7 +52,7 @@ namespace scidb {
             LOG4CXX_DEBUG(logger,"PhysicalExercise1::PhysicalExercise1 called");
         }
 
-        std::shared_ptr<Array> execute(std::vector< std::shared_ptr<Array> >& inputArrays, std::shared_ptr<Query> query) override
+        std::shared_ptr<Array> execute(std::vector< std::shared_ptr<Array> >& inputArrays, std::shared_ptr<Query> query)
         {
             //LOG4CXX_DEBUG(logger,"PhysicalExercise1::execute called");
             SCIDB_ASSERT(inputArrays.size() == 1);
@@ -116,10 +116,9 @@ namespace scidb {
                 /**
                  * Instance 0번이 아닐 경우 empty array 반환
                  */
-                return std::shared_ptr<Array>(new MemArray(_schema, query));
+                return std::shared_ptr<Array>(new MemArray(_schema,query));
             }
         }
-
 
         std::shared_ptr<Array> makeFinalTopKArray
                 (Coordinates startingCell,Coordinates endingCell,vector<double> attributeValues,std::shared_ptr<Query>& query){
@@ -129,7 +128,7 @@ namespace scidb {
 
             //output attribute
             std::shared_ptr<ArrayIterator> outputArrayIter = outputArray->getIterator(0);
-            std::shared_ptr<ConstChunkIterator> outputChunkIter = outputArrayIter->newChunk(startingCell).getIterator(query,ChunkIterator::SEQUENTIAL_WRITE);
+            std::shared_ptr<ChunkIterator> outputChunkIter = outputArrayIter->newChunk(startingCell).getIterator(query,ChunkIterator::SEQUENTIAL_WRITE);
             outputChunkIter->setPosition(startingCell);
 
             //"Example" of writing cells

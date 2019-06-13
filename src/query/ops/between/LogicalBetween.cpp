@@ -106,7 +106,6 @@ class LogicalBetween: public  LogicalOperator
     ArrayDesc inferSchema(std::vector< ArrayDesc> schemas, std::shared_ptr< Query> query)
     {
         assert(schemas.size() == 1);
-
         ArrayDesc const& desc = schemas[0];
         size_t nDims = desc.getDimensions().size();
 

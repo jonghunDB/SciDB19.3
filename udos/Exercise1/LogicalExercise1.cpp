@@ -85,6 +85,8 @@ namespace scidb {
             return &argSpec;
         }
 
+
+
         /**
          *  @see LogicalOperator::inferSchema()
          */

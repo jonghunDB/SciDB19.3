@@ -35,7 +35,8 @@ using namespace std;
 
 namespace scidb
 {
-static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("scidb.unittest"));
+    static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("scidb.udos.UitTestMemArray.UnitTestMemArrayPhysical.cpp"));
+
 
 class UnitTestMemArrayPhysical: public PhysicalOperator
 {
@@ -51,6 +52,20 @@ public:
 
     void preSingleExecute(std::shared_ptr<Query> query)
     {
+    }
+
+/*    bool isNull(CoordValueMap map)
+    {
+        return value.isNull();
+    }*/
+
+
+    template<typename Map,typename F>
+    void map_erase_if(Map &m , F pred)
+    {
+        typename Map::iterator i = m.begin();
+        while((i = std::find_if(i,m.end(),pred)) != m.end())
+            m.erase(i++);
     }
 
     /**
@@ -227,8 +242,7 @@ public:
      *
      * @throw SCIDB_SE_INTERNAL::SCIDB_LE_UNITTEST_FAILED
      */
-    void
-    testAppend_MemArray(std::shared_ptr<Query>& query,
+    void testAppend_MemArray(std::shared_ptr<Query>& query,
                         TypeId const& type,
                         Coordinate start,
                         Coordinate end,
@@ -329,6 +343,139 @@ public:
                       start << "][end=" << end << "][chunkInterval=" << chunkInterval << "]");
     }
 
+
+
+
+/**
+     * Test memarray once.
+     * First this method sets the mem array threshold to
+     * something small.  Then it generates a large 1-d array of
+     * random values.  Finally it scans the values once.
+     * If the number of swapouts is not equal to the number
+     * of reads, we assert.
+     *
+     * @param[in]   query
+     * @param[in]   type     the value type
+     * @param[in]   start    the start coordinate of the dim
+     * @param[in]   end      the end coordinate of the dim
+     * @param[in]   chunkInterval  the chunk interval
+     * @param[in]   threshold the mem-array threshold in mb
+     *
+     * @throw SCIDB_SE_INTERNAL::SCIDB_LE_UNITTEST_FAILED
+     */
+    void make1DArrayMap(std::shared_ptr<Query>& query,
+                         TypeId const& type,
+                         Coordinate start,
+                         Coordinate end,
+                         uint32_t chunkInterval,
+                         uint64_t threshold
+                         )
+    {
+
+        //int per =  100 - (int)(density * 100);
+        int percentNullValue = 99;
+        LOG4CXX_DEBUG(logger, "MemArray UnitTest Attempt [density="  << "][percentNullValue" << percentNullValue <<  "]");
+        const int missingReason = 0;
+
+        LOG4CXX_DEBUG(logger, "MemArray UnitTest Attempt [type=" << type << "][start=" << start << "][end=" << end <<
+                                                                 "][chunkInterval=" << chunkInterval << "][threshold=" << threshold << "]");
+
+        clock_t checktime;
+
+        try
+        {
+            // Descriptor of Attributes
+            Attributes attributes;
+            attributes.push_back(AttributeDesc(
+                    "X",  type, AttributeDesc::IS_NULLABLE, CompressorType::NONE));
+
+            // Descriptor of dimensions
+            vector<DimensionDesc> dimensions(1);
+            dimensions[0] = DimensionDesc(string("dummy_dimension"), start, end, chunkInterval, 0);
+
+            // Array schema : ArrayDesc consumes the new copy, source is discarded.
+            ArrayDesc schema("dummy_array", attributes.addEmptyTagAttribute(), dimensions,
+                             createDistribution(getSynthesizedDistType()),
+                             query->getDefaultArrayResidency());
+
+            // Define the array
+            std::shared_ptr<MemArray> arrayInst(new MemArray(schema,query));
+            std::shared_ptr<Array> baseArrayInst = static_pointer_cast<MemArray, Array>(arrayInst);
+
+            // Generate source data one dimensional key and value map
+            CoordValueMap mapInst;
+            Value value;
+            for (Coordinate i=start; i<end+1; ++i)
+            {
+                mapInst[i] = genRandomValue(type, value, percentNullValue, missingReason);
+            }
+
+            // Insert the map data into the array.
+            insertMapDataIntoArray(query, *arrayInst, mapInst);
+
+
+
+            //copy map and delete NULL elements
+            CoordValueMap copyMapInst;
+            std::copy(mapInst.begin(), mapInst.end(), std::inserter(copyMapInst,copyMapInst.begin()));
+            LOG4CXX_DEBUG(logger, "MemArray UnitTest Attempt [type=" << type << "][start=" << start << "]" );
+
+
+
+            //map_erase_if(copyMapInst, isNull);
+            auto it = copyMapInst.begin();
+            for(;it != copyMapInst.end();)
+            {
+                if(it->second.isNull() )
+                {
+                    copyMapInst.erase(it++);
+                } else {
+                    ++it;
+                }
+
+            }
+            // Scan the array
+            // - Retrieve all data from the array.
+
+            checktime = clock();
+
+            Value t;
+            size_t itemCount = 0;
+
+            //Scan the array with map
+            CoordValueMap::iterator copyIter;
+
+
+            for(copyIter = copyMapInst.begin() ; copyIter!= copyMapInst.end() ; copyIter++)
+            {
+                value = copyIter->second;
+                itemCount++;
+            }
+
+            if (itemCount != mapInst.size())
+            {
+                stringstream ss;
+
+                LOG4CXX_DEBUG(logger,  "wrong # of elements in array, expected: " << mapInst.size() << " got: " << itemCount);
+                //throw SYSTEM_EXCEPTION(SCIDB_SE_INTERNAL, SCIDB_LE_UNITTEST_FAILED) << "UnitTestMemArray" << ss.str();
+            }
+            checktime = clock()- checktime;
+
+            mapInst.clear();
+            copyMapInst.clear();
+
+            LOG4CXX_DEBUG(logger, "Map memarray test scan time [" << checktime << "]")
+        }
+        catch (...)
+        {
+            throw;
+        }
+
+        LOG4CXX_DEBUG(logger, "MemArray UnitTest Success [type=" << type << "][start=" <<
+                                                                 start << "][end=" << end << "][chunkInterval=" << chunkInterval <<
+                                                                 "][threshold=" << threshold << "]");
+    }
+
     /**
      * Test memarray once.
      * First this method sets the mem array threshold to
@@ -346,29 +493,38 @@ public:
      *
      * @throw SCIDB_SE_INTERNAL::SCIDB_LE_UNITTEST_FAILED
      */
-    void testOnce_MemArray(std::shared_ptr<Query>& query,
+    void make1DArrayIter(std::shared_ptr<Query>& query,
                            TypeId const& type,
                            Coordinate start,
                            Coordinate end,
                            uint32_t chunkInterval,
-                           uint64_t threshold)
+                           uint64_t threshold
+                           )
     {
-        const int percentNullValue = 99;
+
+        //int per =  100 - (int)(density * 100);
+        int percentNullValue = 99;
+        LOG4CXX_DEBUG(logger, "MemArray UnitTest Attempt [density="  << "][percentNullValue" << percentNullValue <<  "]");
         const int missingReason = 0;
+
+        clock_t checktime;
+
 
         LOG4CXX_DEBUG(logger, "MemArray UnitTest Attempt [type=" << type << "][start=" << start << "][end=" << end <<
                       "][chunkInterval=" << chunkInterval << "][threshold=" << threshold << "]");
 
         try
         {
-            // Array schema
+            // Descriptor of Attributes
             Attributes attributes;
             attributes.push_back(AttributeDesc(
                 "X",  type, AttributeDesc::IS_NULLABLE, CompressorType::NONE));
 
+            // Descriptor of dimensions
             vector<DimensionDesc> dimensions(1);
             dimensions[0] = DimensionDesc(string("dummy_dimension"), start, end, chunkInterval, 0);
-            // ArrayDesc consumes the new copy, source is discarded.
+
+            // Array schema : ArrayDesc consumes the new copy, source is discarded.
             ArrayDesc schema("dummy_array", attributes.addEmptyTagAttribute(), dimensions,
                              createDistribution(getSynthesizedDistType()),
                              query->getDefaultArrayResidency());
@@ -377,7 +533,7 @@ public:
             std::shared_ptr<MemArray> arrayInst(new MemArray(schema,query));
             std::shared_ptr<Array> baseArrayInst = static_pointer_cast<MemArray, Array>(arrayInst);
 
-            // Generate source data
+            // Generate source data one dimensional key and value map
             CoordValueMap mapInst;
             Value value;
             for (Coordinate i=start; i<end+1; ++i)
@@ -387,6 +543,8 @@ public:
 
             // Insert the map data into the array.
             insertMapDataIntoArray(query, *arrayInst, mapInst);
+
+            checktime =clock();
 
             // Scan the array
             // - Retrieve all data from the array.
@@ -405,6 +563,7 @@ public:
                 while (!constChunkIter->end())
                 {
                     itemCount++;
+                    // 읽는다.
                     Value const& v = constChunkIter->getItem();
                     t = v;
                     ++(*constChunkIter);
@@ -420,6 +579,13 @@ public:
                 throw SYSTEM_EXCEPTION(SCIDB_SE_INTERNAL, SCIDB_LE_UNITTEST_FAILED) <<
                     "UnitTestMemArray" << ss.str();
             }
+
+
+            checktime =clock() - checktime;
+
+            mapInst.clear();
+
+            LOG4CXX_DEBUG(logger, "Iter memarray test scan time [" << checktime  << "]")
         }
         catch (...)
         {
@@ -429,19 +595,40 @@ public:
         LOG4CXX_DEBUG(logger, "MemArray UnitTest Success [type=" << type << "][start=" <<
                       start << "][end=" << end << "][chunkInterval=" << chunkInterval <<
                       "][threshold=" << threshold << "]");
+
+
     }
 
     std::shared_ptr<Array> execute(vector< std::shared_ptr<Array> >& inputArrays, std::shared_ptr<Query> query)
     {
+
+        Parameter densityParam = findKeyword("density");
+        if(_parameters.size() >= 1)
+        {
+            ASSERT_EXCEPTION(!densityParam, "Conflicting positional and keyword density parameters!");
+            densityParam =_parameters[0];
+        }
+
+        Value const& density = ((std::shared_ptr<OperatorParamPhysicalExpression>&)densityParam)->getExpression()->evaluate();
+        if(!density.isNull())
+        {
+            _density = density.getUint64();
+        }
+
         if (query->isCoordinator())
         {
             srand(static_cast<unsigned int>(time(NULL)));
 
-            testOnce_MemArray(query, TID_INT64, 0, 1000000, 10000, 8);
+            //make1DArrayIter(query, TID_INT64, 0, 50000000, 1000000, 8);
+            make1DArrayMap(query, TID_INT64,0,50000000,1000000 ,8);
             //testAppend_MemArray(query, TID_INT64, 0, 500000, 10000);
         }
+        // Just return ana empty array
         return std::shared_ptr<Array>(new MemArray(_schema,query));
     }
+
+private:
+    uint64_t _density;
 
 };
 

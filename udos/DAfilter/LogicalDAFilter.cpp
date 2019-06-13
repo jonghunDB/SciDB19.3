@@ -118,13 +118,8 @@ public:
         assert(schemas.size() == 1);
         //example) filter(array ,attribute1 < 100 ) 하나의 attribute이나 dimension을 parameter로 씀
         assert(_parameters.size() == 1);
-        //
         assert(_parameters[0]->getParamType() == PARAM_LOGICAL_EXPRESSION);
 
-        if(global)
-        {
-
-        }
 
         return schemas[0].addEmptyTagAttribute();
     }

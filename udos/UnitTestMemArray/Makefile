@@ -56,7 +56,7 @@ else
  endif
 endif
 
-all: libUnitTestMemArray.so
+all: libUnitTestMemArray.so cpandrestartscidb
 
 clean:
 	rm -rf *.so *.o
@@ -68,9 +68,12 @@ libUnitTestMemArray.so: $(SRCS)
 	$(CXX) $(CCFLAGS) $(INC) -o libUnitTestMemArray.so plugin.cpp UnitTestMemArrayLogical.o UnitTestMemArrayPhysical.o $(LIBS)
 	@echo "Now copy libequi_join.so to $(INSTALL_DIR) on all your SciDB nodes, and restart SciDB."
 
-test:
+cpandrestartscidb:
+	echo "cp libUnitTestMemArray file"
+	sudo cp libUnitTestMemArray.so /opt/scidb/19.3/lib/scidb/plugins
+	scidbctl.py stop
+	sleep 10
+	scidbctl.py start
+	iquery -aq "load_library('UnitTestMemArray')"
 	./test.sh
 
-	#cp libUnitTestMemArray.so /home/otter/Desktop/scidb_plugins
-	#scp libUnitTestMemArray.so scidb@master1.korea.ac.kr:~
-	#scp libUnitTestMemArray.so scidb@master2.korea.ac.kr:~

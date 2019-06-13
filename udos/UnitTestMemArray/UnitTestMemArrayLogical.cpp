@@ -31,6 +31,7 @@
 #include <query/LogicalOperator.h>
 #include <query/Expression.h>
 
+static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("scidb.udos.UitTestMemArray.UnitTestMemArrayLogical.cpp"));
 
 namespace scidb
 {
@@ -71,57 +72,70 @@ public:
     UnitTestMemArrayLogical(const string& logicalName, const std::string& alias):
     LogicalOperator(logicalName, alias)
     {
+        LOG4CXX_DEBUG(logger,"UnitTestMemArrayLogical::UnitTestMemArrayLogical called");
+
+    }
+
+    //OperatorParamPlaceholder PP
+    //PlistRegex RE : in logical ops less cumbersome.
+    static PlistSpec const* makePlistSpec()
+    {
+        static PlistSpec argSpec {
+                { "", // positionals
+                        RE(RE::LIST, {
+                                //첫번째 Parameter는 input array
+                                //RE(PP(PLACEHOLDER_INPUT)),
+                                //두 번째 parameter는 double 형, density를 나타낼때 사용할 것.
+                                RE(PP(PLACEHOLDER_CONSTANT, TID_DOUBLE))
+                        })
+                }
+        };
+        return &argSpec;
     }
 
     ArrayDesc inferSchema(std::vector<ArrayDesc> schemas, std::shared_ptr< Query> query)
     {
+        LOG4CXX_DEBUG(logger,"UnitTestMemArrayLogical::inferSchema called");
+/*
+        assert(schemas.size() == 1);
+        assert(_parameters.size() == 1);
+        assert(_parameters[0]->getParamType() == PARAM_LOGICAL_EXPRESSION);
 
-        bool global = false;
 
-        Parameter globalParam = findKeyword("global");
-        if(globalParam)
-        {
-            global = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&)globalParam)->getExpression(),TID_BOOL).getBool();
-        }
+        return schemas[0].addEmptyTagAttribute();
+*/
+
 
         /* Make the output schema.*/
-        Attributes attributes;
-        attributes.push_back(AttributeDesc(
-                string("firstAttribute"), TID_INT64, 0, CompressorType::NONE));
+        Attributes attrs;
+        attrs.push_back(AttributeDesc(
+                string("X"), TID_INT64, 0, CompressorType::NONE));
+        Dimensions dims;
+        dims.push_back(DimensionDesc(
+                string("dummy_dimension"), Coordinate(0), Coordinate(0), uint32_t(0), uint32_t(0)));
 
 
-
-        Dimensions dimensions;
-        Coordinates coordinates;
-        coordinates.
-        dimensions.push_back(DimensionDesc(
-                string("firstDimension"), Coordinate(0), Coordinate(0), uint32_t(0), uint32_t(0)));
-        //vector<DimensionDesc> dimensions(1);
-        //dimensions[0] = DimensionDesc(string("dummy_dimension"), Coordinate(0), Coordinate(0), uint32_t(0), uint32_t(0));
-
-
-        return ArrayDesc("test_memarray", attributes, dimensions,
+        return ArrayDesc("test_memarray", attrs, dims,
                          createDistribution(getSynthesizedDistType()),
                          query->getDefaultArrayResidency());
 
-
-
-        /* Make the output schema.*/
-        //여기서는 입력받은 schema를 그대로 사용하기 때문에 따로 변경할 필요가 없음. 하지만 일반적으로 udo를 만들때 schema를 설정해야 함
-        //schemas vector를 불러와서 하나의 array인지 확인.
-        assert(schemas.size() == 1);
-        //example) filter(array ,attribute1 < 100 ) 하나의 attribute이나 dimension을 parameter로 씀
-        assert(_parameters.size() == 1);
-        //
-        assert(_parameters[0]->getParamType() == PARAM_LOGICAL_EXPRESSION);
-
-        if(global)
-        {
-
-        }
-
-        return schemas[0].addEmptyTagAttribute();
     }
+         /* Make the output schema.*/
+//        //여기서는 입력받은 schema를 그대로 사용하기 때문에 따로 변경할 필요가 없음. 하지만 일반적으로 udo를 만들때 schema를 설정해야 함
+//        //schemas vector를 불러와서 하나의 array인지 확인.
+//        assert(schemas.size() == 1);
+//        //example) filter(array ,attribute1 < 100 ) 하나의 attribute이나 dimension을 parameter로 씀
+//        assert(_parameters.size() == 1);
+//        //
+//        assert(_parameters[0]->getParamType() == PARAM_LOGICAL_EXPRESSION);
+//
+//        if(global)
+//        {
+//
+//        }
+//
+//        return schemas[0].addEmptyTagAttribute();
+
 
 };
 

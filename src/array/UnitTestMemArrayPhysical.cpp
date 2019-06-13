@@ -57,7 +57,8 @@ public:
      * The function should be extended to cover all types and all special values such as NaN, and then be moved to a public header file.
      * @param[in]      type        the type of the value
      * @param[in, out] value       the value to be filled
-     * @param[in]      percentNull a number from 0 to 100, where 0 means never generate null, and 100 means always generate null
+     * @param[in]      percentNull a number from 0 to 100, where 0 means never generate null, and 100 means always generate null 100이면 Density =0, 0이면 Density = 1,
+     * Density = (100 - percentNull)/100
      * @return         the value from the parameter
      */
     Value& genRandomValue(TypeId const& type, Value& value, int percentNull, Value::reason nullReason)
@@ -350,9 +351,12 @@ public:
                            Coordinate start,
                            Coordinate end,
                            uint32_t chunkInterval,
-                           uint64_t threshold)
+                           uint64_t threshold
+                          )
     {
-        const int percentNullValue = 0;
+        //
+
+        const int percentNullValue =0;
         const int missingReason = 0;
 
         LOG4CXX_DEBUG(logger, "MemArray UnitTest Attempt [type=" << type << "][start=" << start << "][end=" << end <<
