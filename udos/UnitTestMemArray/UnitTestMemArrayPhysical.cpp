@@ -68,6 +68,17 @@ public:
             m.erase(i++);
     }
 
+
+    template <typename M>
+    void FreeClear(M & map)
+    {
+        for(typename M::iterator it = map.begin() ; it != map.end(); ++it)
+        {
+            delete it->second;
+        }
+        map.clear();
+    }
+
     /**
      * Generate a random value.
      * The function should be extended to cover all types and all special values such as NaN, and then be moved to a public header file.
@@ -460,9 +471,8 @@ public:
                 //throw SYSTEM_EXCEPTION(SCIDB_SE_INTERNAL, SCIDB_LE_UNITTEST_FAILED) << "UnitTestMemArray" << ss.str();
             }
             checktime = clock()- checktime;
-
-            mapInst.clear();
-            copyMapInst.clear();
+            FreeClear(mapInst);
+            FreeClear(copyIter);
 
             LOG4CXX_DEBUG(logger, "Map memarray test scan time [" << checktime << "]")
         }
@@ -583,7 +593,8 @@ public:
 
             checktime =clock() - checktime;
 
-            mapInst.clear();
+            FreeClear(mapInst);
+
 
             LOG4CXX_DEBUG(logger, "Iter memarray test scan time [" << checktime  << "]")
         }
