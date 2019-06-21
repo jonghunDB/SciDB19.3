@@ -778,7 +778,7 @@ namespace scidb
         _sizeLimit = Config::getInstance()->getOption<size_t>(CONFIG_CHUNK_SIZE_LIMIT);
 #endif
         if (_sDebug) {
-            LOG4CXX_TRACE(logger, "RLEChunkIterator::RLEChunkIterator this="<<this
+            LOG4CXX_DEBUG(logger, "RLEChunkIterator::RLEChunkIterator this="<<this
                           <<" data="<<data
                           <<" bitmap "<<bitmap
                           <<" attr "<<attr

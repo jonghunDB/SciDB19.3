@@ -35,7 +35,7 @@ static log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("scidb.udos.UitTestM
 
 namespace scidb
 {
-using namespace std;
+    using namespace std;
 
 /**
  * @brief The operator: test_memarray().
@@ -66,61 +66,112 @@ using namespace std;
  * @par Notes:
  *
  */
-class UnitTestMemArrayLogical: public LogicalOperator
-{
-public:
-    UnitTestMemArrayLogical(const string& logicalName, const std::string& alias):
-    LogicalOperator(logicalName, alias)
+    class UnitTestMemArrayLogical: public LogicalOperator
     {
-        LOG4CXX_DEBUG(logger,"UnitTestMemArrayLogical::UnitTestMemArrayLogical called");
+    public:
+        UnitTestMemArrayLogical(const string& logicalName, const std::string& alias):
+                LogicalOperator(logicalName, alias)
+        {
+            LOG4CXX_DEBUG(logger,"UnitTestMemArrayLogical::UnitTestMemArrayLogical called");
 
-    }
+        }
 
-    //OperatorParamPlaceholder PP
-    //PlistRegex RE : in logical ops less cumbersome.
-    static PlistSpec const* makePlistSpec()
-    {
-        static PlistSpec argSpec {
-                { "", // positionals
-                        RE(RE::LIST, {
-                                //첫번째 Parameter는 input array
-                                //RE(PP(PLACEHOLDER_INPUT)),
-                                //두 번째 parameter는 double 형, density를 나타낼때 사용할 것.
-                                RE(PP(PLACEHOLDER_CONSTANT, TID_DOUBLE))
-                        })
+        //OperatorParamPlaceholder PP
+        //PlistRegex RE : in logical ops less cumbersome.
+
+
+        // test_memarray( ow_coord1 [,low_coord2,...], high_coord1 [,high_coord2,...] , nDimension, chunkInterval, density, threshold{지금은 Iter인지 map인지 나타냄});
+        static PlistSpec const* makePlistSpec()
+        {
+            static PlistSpec argSpec {
+                    { "", // positionals
+                            RE(RE::LIST, {
+                                    //RE(PP(PLACEHOLDER_INPUT)),
+                                    RE(RE::PLUS, {
+                                        RE(PP(PLACEHOLDER_CONSTANT, TID_INT64)),
+                                        RE(PP(PLACEHOLDER_CONSTANT, TID_INT64))
+
+                                    }),
+                                    RE(PP(PLACEHOLDER_CONSTANT)),
+                                    RE(PP(PLACEHOLDER_CONSTANT)),
+                                    RE(PP(PLACEHOLDER_CONSTANT)),
+                                    RE(PP(PLACEHOLDER_CONSTANT))
+                            })
+                    }
+            };
+            return &argSpec;
+        }
+
+
+        ArrayDesc inferSchema(std::vector<ArrayDesc> schemas, std::shared_ptr< Query> query)
+        {
+            LOG4CXX_DEBUG(logger,"UnitTestMemArrayLogical::inferSchema called");
+
+
+            if(_parameters.size() == 0 )
+            {
+                stringstream ss; ss << "zero  ";
+                throw USER_EXCEPTION(SCIDB_SE_INFER_SCHEMA, SCIDB_LE_WRONG_OPERATOR_ARGUMENTS_COUNT3)
+                        << "test_memarray" << ss.str();
+            }
+
+            for(Parameters::const_iterator it = _parameters.begin(); it != _parameters.end(); it++ )
+            {
+                assert(((std::shared_ptr<OperatorParam>&)*it)->getParamType() == PARAM_LOGICAL_EXPRESSION);
+                assert(((std::shared_ptr<OperatorParamLogicalExpression>&)*it)->isConstant());
+            }
+
+            size_t nDims = (_parameters.size()-4) /2 ;
+
+            Value const& ndimms = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&) _parameters[2*nDims])->getExpression(), TID_INT64);
+            Value const& chunkInterval = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&) _parameters[2*nDims+1])->getExpression(), TID_INT64);
+            Value const& density = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&) _parameters[2*nDims+2])->getExpression(), TID_INT64);
+            Value const& threshold = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&) _parameters[2*nDims+3])->getExpression(), TID_INT64);
+
+
+            if(nDims != ndimms.getUint64())
+            {
+                stringstream ss; ss << "dimension size is not correct  nDims : " << nDims ;
+                throw USER_EXCEPTION(SCIDB_SE_INFER_SCHEMA, SCIDB_LE_WRONG_OPERATOR_ARGUMENTS_COUNT3)
+                        << "test_memarray" << ss.str();
+            }
+
+            Coordinates startC(nDims);
+            Coordinates endC(nDims);
+
+            for(size_t i =0 ;i <nDims ;i++)
+            {
+                Value const& start = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&) _parameters[i])->getExpression(), TID_INT64);
+                if(!start.isNull())
+                {
+                    startC[i] = start.getInt64();
                 }
-        };
-        return &argSpec;
-    }
+                Value const& end = evaluate(((std::shared_ptr<OperatorParamLogicalExpression>&) _parameters[i+ nDims])->getExpression(),TID_INT64);
+                if(!end.isNull())
+                {
+                    endC[i] = end.getInt64();
+                }
 
-    ArrayDesc inferSchema(std::vector<ArrayDesc> schemas, std::shared_ptr< Query> query)
-    {
-        LOG4CXX_DEBUG(logger,"UnitTestMemArrayLogical::inferSchema called");
-/*
-        assert(schemas.size() == 1);
-        assert(_parameters.size() == 1);
-        assert(_parameters[0]->getParamType() == PARAM_LOGICAL_EXPRESSION);
+            }
+
+            /* Make the output schema.*/
+            Attributes attrs;
+            attrs.push_back(AttributeDesc(
+                    string("X"), TID_INT64, 0, CompressorType::NONE));
+
+            Dimensions dims(nDims);
+            for(size_t i =0 ; i < nDims ; i++)
+            {
+                std::string arrayName = "" + to_string(i);
+                dims[i] = DimensionDesc( arrayName ,0,0,endC[i],endC[i],chunkInterval.getInt64(),0 );
+            }
 
 
-        return schemas[0].addEmptyTagAttribute();
-*/
 
+            return ArrayDesc("test_memarray", attrs, dims, createDistribution(getSynthesizedDistType()), query->getDefaultArrayResidency());
 
+        }
         /* Make the output schema.*/
-        Attributes attrs;
-        attrs.push_back(AttributeDesc(
-                string("X"), TID_INT64, 0, CompressorType::NONE));
-        Dimensions dims;
-        dims.push_back(DimensionDesc(
-                string("dummy_dimension"), Coordinate(0), Coordinate(0), uint32_t(0), uint32_t(0)));
-
-
-        return ArrayDesc("test_memarray", attrs, dims,
-                         createDistribution(getSynthesizedDistType()),
-                         query->getDefaultArrayResidency());
-
-    }
-         /* Make the output schema.*/
 //        //여기서는 입력받은 schema를 그대로 사용하기 때문에 따로 변경할 필요가 없음. 하지만 일반적으로 udo를 만들때 schema를 설정해야 함
 //        //schemas vector를 불러와서 하나의 array인지 확인.
 //        assert(schemas.size() == 1);
@@ -137,7 +188,7 @@ public:
 //        return schemas[0].addEmptyTagAttribute();
 
 
-};
+    };
 
-REGISTER_LOGICAL_OPERATOR_FACTORY(UnitTestMemArrayLogical, "test_memarray");
+    REGISTER_LOGICAL_OPERATOR_FACTORY(UnitTestMemArrayLogical, "test_memarray");
 }  // namespace scidb

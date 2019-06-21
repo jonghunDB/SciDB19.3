@@ -295,7 +295,7 @@ namespace scidb
             return isEmptyable ? emptyBitmapIterator.getLPos() : emptyBitmapIterator.getPPos();
         }
         arena::ArenaPtr const _arena;
-        ValueMap  _values;
+        ValueMap  _values;           //  fisrt get data from RLEPayload
         size_t    _valuesFootprint;  // current memory footprint of elements in _values
         size_t    _initialFootprint; // memory footprint of original data payload
         Value     trueValue;

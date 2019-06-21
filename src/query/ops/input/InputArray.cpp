@@ -170,8 +170,7 @@ InputArray::InputArray(ArrayDesc const& array,
             std::shared_ptr<Query> query(Query::getValidQueryPtr(_query));
             if (chunkIndex <= _currChunkIndex) {
                 return true;
-            }
-            if (state == S_Empty) {
+            }if (state == S_Empty) {
                 state = S_Done;
                 return false;
             }
@@ -187,7 +186,6 @@ InputArray::InputArray(ArrayDesc const& array,
                               << " is in progress: load at this moment " << nLoadedChunks
                               << " chunks and " << nLoadedCells
                               << " cells with " << nErrors << " errors");
-
                 _currChunkIndex += 1;
             } else {
                 state = S_Done;

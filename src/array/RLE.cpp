@@ -630,6 +630,7 @@ namespace scidb
         segm._pPosition = 0;
         segm._length = 0;
         segm._lPosition = 0;
+        //전달된 개수 만큼 메모리를 할당.
         reserve(vm.size());
         for (ValueMap::const_iterator i = vm.begin(); i != vm.end(); ++i) {
             assert(i->first >= segm._lPosition + segm._length);

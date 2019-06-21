@@ -75,5 +75,4 @@ cpandrestartscidb:
 	sleep 10
 	scidbctl.py start
 	iquery -aq "load_library('UnitTestMemArray')"
-	./test.sh
 

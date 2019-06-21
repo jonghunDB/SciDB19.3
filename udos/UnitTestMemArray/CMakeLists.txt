@@ -22,7 +22,7 @@
 set (   UnitTestMemArray_src
         UnitTestMemArrayLogical.cpp
         UnitTestMemArrayPhysical.cpp
-        )
+        MemTrack.cpp MemTrack.h)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
 file(GLOB UnitTestMemArray_include "*.h")

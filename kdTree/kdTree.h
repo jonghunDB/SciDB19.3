@@ -41,7 +41,9 @@ neighbors within a given distance
 #include <memory>
 #include <vector>
 
-using namespace scidb
+using namespace std;
+
+namespace scidb
 {
 
 // KDNode
