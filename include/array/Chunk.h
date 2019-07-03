@@ -25,6 +25,7 @@
  *
  * @brief class Chunk
  *
+ * Array.h는 8개로 나누어지고 5개의 보조하는 헤더파일이 있음.
  * Note: Array.h was split into
  *   8 main classes:
  *     ConstIterator.h ConstArrayIterator.h ArrayIterator.h ConstItemIterator.h

@@ -795,6 +795,7 @@ namespace scidb
             if (!(iterationMode &
                   (ConstChunkIterator::SEQUENTIAL_WRITE|ConstChunkIterator::TILE_MODE))) {
 
+                // 여기가 잘봐야 할 곳
                 // use ValueMap, suck all the existing data into a ValueMap first
 
                 if (isEmptyable) {

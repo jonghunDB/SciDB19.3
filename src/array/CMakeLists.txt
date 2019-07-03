@@ -71,7 +71,7 @@ set (array_src
      Tile.cpp
      TransientCache.cpp
      TupleArray.cpp
-        ../../kdTree/kdTree.h ../../kdTree/kdTree.cpp)
+        ../../kdTree_old/kdTree.h ../../kdTree_old/kdTree.cpp)
 
 
 #[[set (array_src

@@ -48,7 +48,7 @@
 #include <monitor/InstanceStats.h>
 #include <monitor/MonitorConfig.h>
 #include <util/PerfTime.h>
-
+#include <kdb.h>
 namespace scidb
 {
     using namespace std;

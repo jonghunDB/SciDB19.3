@@ -184,6 +184,7 @@ namespace scidb
             } else {
                 for (size_t j = 0; j < len; j++) {
                     if (payload.checkBit(bit+j)) {
+
                         if (size_t(bs._lPosition + bs._length) == ps.pPosition() + j) {
                             bs._length += 1;
                         } else {

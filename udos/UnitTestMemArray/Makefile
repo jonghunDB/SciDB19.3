@@ -1,5 +1,5 @@
 ifeq ($(SCIDB),) 
-  X := $(shell which scidb 2>/dev/null)
+  X := $(shell which scikDdb 2>/dev/null)
   ifneq ($(X),)
     X := $(shell dirname ${X})
     SCIDB := $(shell dirname ${X})

@@ -22,12 +22,12 @@
 set (   UnitTestMemArray_src
         UnitTestMemArrayLogical.cpp
         UnitTestMemArrayPhysical.cpp
-        MemTrack.cpp MemTrack.h)
+        MemTrack.cpp MemTrack.h ../../kdTree_old/test_kdtree.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
 file(GLOB UnitTestMemArray_include "*.h")
 
-add_library(UnitTestMemArray_lib STATIC ${UnitTestMemArray_src} ${UnitTestMemArray_include})
+add_library(UnitTestMemArray_lib STATIC ${UnitTestMemArray_src} ${UnitTestMemArray_include} ../../kdTree_old/test_kdtree.cpp)
 #target_link_libraries(ops_lib compression_lib network_lib MurmurHash_lib ${libcsv_LIBRARY})
 
 

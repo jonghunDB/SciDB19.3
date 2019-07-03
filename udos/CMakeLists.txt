@@ -26,6 +26,7 @@ add_subdirectory("Exercise1")
 add_subdirectory("DAfilter")
 add_subdirectory("hdf5")
 add_subdirectory("UnitTestMemArray")
+add_subdirectory("KDTree")
 #
 #  PGB: Adding this to help me to build a couple of fast and dirty examples
 #       of how things like the UDF SDK would work.

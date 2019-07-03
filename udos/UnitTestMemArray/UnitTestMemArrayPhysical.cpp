@@ -34,6 +34,10 @@
 #include "array/RLE.h"
 #include "array/MemArray.h"
 
+#include "../KDTree/src/KDTree.h"
+#include "../KDTree/src/Point.h"
+#include "../KDTree/src/BoundedPQueue.h"
+
 using namespace std;
 
 namespace scidb
@@ -52,29 +56,12 @@ namespace scidb
                 : PhysicalOperator(logicalName, physicalName, parameters, schema)
         {
         }
-        /*
 
-        template<typename Map,typename F>
-        void map_erase_if(Map &m , F pred)
+        KDTree makeKdTree(std::shared_ptr<Query> query, MemArray memarray )
         {
-            typename Map::iterator i = m.begin();
-            while((i = std::find_if(i,m.end(),pred)) != m.end())
-                m.erase(i++);
-        }*/
 
-
-        /*
-                template <typename M>
-                void FreeClear(M & map)
-                {
-                    for(typename M::iterator it = map.begin() ; it != map.end(); ++it)
-                    {
-                        delete it->second;
-                    }
-                    map.clear();
-                }
-        */
-
+            return kdtree
+        }
         /**
          * Generate a random value.
          * The function should be extended to cover all types and all special values such as NaN, and then be moved to a public header file.
